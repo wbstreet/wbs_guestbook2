@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $path_core = __DIR__.'/../wbs_core/include_all.php';
 if (file_exists($path_core )) include($path_core );
@@ -94,11 +94,42 @@ class ModGuestbook2 extends Addon {
     }
     
     function get_sign($sets=[], $only_count=false ) {
-    
+        $tables = [$this->tbl_guestbook_sign];
+
+        $where = [];
+
+        $where_opts = [
+                'page_id'=>$this->tbl_guestbook_sign.".`page_id`",
+                'section_id'=>$this->tbl_guestbook_sign.".`section_id`",
+                'tag_name'=>$this->tbl_guestbook_tag.".`guestbook_tag_name`",
+        ];
+        
+        $where_find = ['text'=>"{$this->tbl_guestbook_sign}.`guestbook_sign_text`"];
+        
+        if (isset($sets['tag_name'])) {
+            $tables = array_merge($tables, [$this->tbl_guestbook_tag, $this->tbl_guestbook_sign_tag]);
+            $where = array_merge($where, [
+                $this->tbl_guestbook_tag.".`guestbook_tag_id`=".$this->tbl_guestbook_sign_tag.".`guestbook_tag_id`",
+                $this->tbl_guestbook_sign.".`guestbook_sign_id`=".$this->tbl_guestbook_sign_tag.".`guestbook_sign_id`"
+            ]);
+        }
+        
+        return get_obj($tables, $where, $where_opts, $where_find, $sets, $only_count);
     }
     
     function get_tag($sets=[], $only_count=false ) {
-    
+        $tables = [$this->tbl_guestbook_tag, $this->tbl_guestbook_sign_tag];
+
+        $where = [$this->tbl_guestbook_tag.".`guestbook_tag_id`=".$this->tbl_guestbook_sign_tag.".`guestbook_tag_id`"];
+
+        $where_opts = [
+                'sign_id'=>$this->tbl_guestbook_sign_tag.".`guestbok_sign_id`",
+        ];
+        
+        $where_find = [];
+        
+        return get_obj($tables, $where, $where_opts, $where_find, $sets, $only_count);
+
     }
 
 
